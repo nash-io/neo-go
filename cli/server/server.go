@@ -9,6 +9,7 @@ import (
 	"github.com/nspcc-dev/neo-go/pkg/config"
 	"github.com/nspcc-dev/neo-go/pkg/core"
 	"github.com/nspcc-dev/neo-go/pkg/core/block"
+	"github.com/nspcc-dev/neo-go/pkg/core/state"
 	"github.com/nspcc-dev/neo-go/pkg/core/storage"
 	"github.com/nspcc-dev/neo-go/pkg/encoding/address"
 	"github.com/nspcc-dev/neo-go/pkg/io"
@@ -64,6 +65,10 @@ func NewCommands() []cli.Command {
 		cli.BoolFlag{
 			Name:  "diff, k",
 			Usage: "Use if DB is restore from diff and not full dump",
+		},
+		cli.BoolFlag{
+			Name:  "state, r",
+			Usage: "Import state roots instead of blocks",
 		},
 	)
 	return []cli.Command{
@@ -251,8 +256,12 @@ func restoreDB(ctx *cli.Context) error {
 	defer inStream.Close()
 	reader := io.NewBinReaderFromIO(inStream)
 
+	importState := ctx.Bool("state")
 	dumpDir := ctx.String("dump")
 	if dumpDir != "" {
+		if importState {
+			return cli.NewExitError("`--dump` flag can'be specified together with `--state`", 1)
+		}
 		cfg.ProtocolConfiguration.SaveStorageBatch = true
 	}
 
@@ -266,7 +275,7 @@ func restoreDB(ctx *cli.Context) error {
 
 	dumpStart := uint32(0)
 	dumpSize := reader.ReadU32LE()
-	if ctx.Bool("diff") {
+	if ctx.Bool("diff") || importState {
 		// in diff first uint32 is the index of the first block
 		dumpStart = dumpSize
 		dumpSize = reader.ReadU32LE()
@@ -310,8 +319,20 @@ func restoreDB(ctx *cli.Context) error {
 		if err != nil {
 			return cli.NewExitError(err, 1)
 		}
-		block := &block.Block{}
 		newReader := io.NewBinReaderFromBuf(bytes)
+		if importState {
+			sr := new(state.MPTRoot)
+			sr.DecodeBinary(newReader)
+			if newReader.Err != nil {
+				return cli.NewExitError(fmt.Errorf("can't decode state root: %w", newReader.Err), 1)
+			}
+			err = chain.AddStateRoot(sr)
+			if err != nil {
+				return cli.NewExitError(fmt.Errorf("can't add state root: %w", err), 1)
+			}
+			continue
+		}
+		block := &block.Block{}
 		block.DecodeBinary(newReader)
 		if newReader.Err != nil {
 			return cli.NewExitError(newReader.Err, 1)
