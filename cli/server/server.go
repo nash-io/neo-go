@@ -50,6 +50,10 @@ func NewCommands() []cli.Command {
 			Name:  "out, o",
 			Usage: "Output file (stdout if not given)",
 		},
+		cli.BoolFlag{
+			Name:  "state, r",
+			Usage: "Export state roots instead of blocks",
+		},
 	)
 	var cfgCountInFlags = make([]cli.Flag, len(cfgWithCountFlags))
 	copy(cfgCountInFlags, cfgWithCountFlags)
@@ -209,18 +213,29 @@ func dumpDB(ctx *cli.Context) error {
 	if count == 0 {
 		count = chainCount - start
 	}
-	if start != 0 {
+	exportState := ctx.Bool("state")
+	if start != 0 || exportState {
 		writer.WriteU32LE(start)
 	}
 	writer.WriteU32LE(count)
 	for i := start; i < start+count; i++ {
-		bh := chain.GetHeaderHash(int(i))
-		b, err := chain.GetBlock(bh)
-		if err != nil {
-			return cli.NewExitError(fmt.Errorf("failed to get block %d: %s", i, err), 1)
+		var item io.Serializable
+		if exportState {
+			r, err := chain.GetStateRoot(i)
+			if err != nil {
+				return cli.NewExitError(fmt.Errorf("failed to get stateroot %d: %w", i, err), 1)
+			}
+			item = &r.MPTRoot
+		} else {
+			bh := chain.GetHeaderHash(int(i))
+			b, err := chain.GetBlock(bh)
+			if err != nil {
+				return cli.NewExitError(fmt.Errorf("failed to get block %d: %s", i, err), 1)
+			}
+			item = b
 		}
 		buf := io.NewBufBinWriter()
-		b.EncodeBinary(buf.BinWriter)
+		item.EncodeBinary(buf.BinWriter)
 		bytes := buf.Bytes()
 		writer.WriteU32LE(uint32(len(bytes)))
 		writer.WriteBytes(bytes)
