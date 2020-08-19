@@ -699,6 +699,7 @@ func (c *codegen) Visit(node ast.Node) ast.Visitor {
 			numArgs   = len(n.Args)
 			isBuiltin bool
 			isFunc    bool
+			isLiteral bool
 		)
 
 		switch fun := n.Fun.(type) {
@@ -737,6 +738,8 @@ func (c *codegen) Visit(node ast.Node) ast.Visitor {
 			ast.Walk(c, n.Args[0])
 			c.emitConvert(stackitem.BufferT)
 			return nil
+		case *ast.FuncLit:
+			isLiteral = true
 		}
 
 		c.saveSequencePoint(n)
@@ -789,6 +792,9 @@ func (c *codegen) Visit(node ast.Node) ast.Visitor {
 				c.emitLoadVar("", name)
 				emit.Opcode(c.prog.BinWriter, opcode.CALLA)
 			}
+		case isLiteral:
+			ast.Walk(c, n.Fun)
+			emit.Opcode(c.prog.BinWriter, opcode.CALLA)
 		case isSyscall(f):
 			c.convertSyscall(n, f.pkg.Name(), f.name)
 		default:
