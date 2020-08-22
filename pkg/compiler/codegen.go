@@ -12,7 +12,6 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/nspcc-dev/neo-go/pkg/core/interop/interopnames"
 	"github.com/nspcc-dev/neo-go/pkg/encoding/address"
 	"github.com/nspcc-dev/neo-go/pkg/io"
 	"github.com/nspcc-dev/neo-go/pkg/vm"
@@ -1377,17 +1376,7 @@ func (c *codegen) convertBuiltin(expr *ast.CallExpr) {
 			}
 		}
 	case "panic":
-		arg := expr.Args[0]
-		if isExprNil(arg) {
-			emit.Opcode(c.prog.BinWriter, opcode.DROP)
-			emit.Opcode(c.prog.BinWriter, opcode.THROW)
-		} else if isString(c.typeInfo.Types[arg].Type) {
-			ast.Walk(c, arg)
-			emit.Syscall(c.prog.BinWriter, interopnames.SystemRuntimeLog)
-			emit.Opcode(c.prog.BinWriter, opcode.THROW)
-		} else {
-			c.prog.Err = errors.New("panic should have string or nil argument")
-		}
+		emit.Opcode(c.prog.BinWriter, opcode.THROW)
 	case "ToInteger", "ToByteArray", "ToBool":
 		typ := stackitem.IntegerT
 		switch name {
@@ -1427,10 +1416,6 @@ func transformArgs(fun ast.Expr, args []ast.Expr) []ast.Expr {
 	switch f := fun.(type) {
 	case *ast.SelectorExpr:
 		if f.Sel.Name == "FromAddress" {
-			return args[1:]
-		}
-	case *ast.Ident:
-		if f.Name == "panic" {
 			return args[1:]
 		}
 	}
