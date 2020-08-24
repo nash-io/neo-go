@@ -131,6 +131,18 @@ func TestAddNetworkFee(t *testing.T) {
 		cFeeM, _ := core.CalculateNetworkFee(accs[1].Contract.Script)
 		require.Equal(t, int64(io.GetVarSize(tx))*feePerByte+cFee+cFeeM+10, tx.NetworkFee)
 	})
+	t.Run("Contract", func(t *testing.T) {
+		tx := transaction.New(testchain.Network(), []byte{byte(opcode.PUSH1)}, 0)
+		accs := getAccounts(t, 1)
+		tx.Signers = []transaction.Signer{{
+			Account: accs[0].PrivateKey().GetScriptHash(),
+			Scopes:  transaction.CalledByEntry,
+		}}
+		require.NoError(t, c.AddNetworkFee(tx, 10, accs[0]))
+		require.NoError(t, accs[0].SignTx(tx))
+		cFee, _ := core.CalculateNetworkFee(accs[0].Contract.Script)
+		require.Equal(t, int64(io.GetVarSize(tx))*feePerByte+cFee+10, tx.NetworkFee)
+	})
 }
 
 func TestSignAndPushInvocationTx(t *testing.T) {

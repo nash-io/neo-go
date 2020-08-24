@@ -14,6 +14,7 @@ import (
 	"github.com/nspcc-dev/neo-go/pkg/crypto/keys"
 	"github.com/nspcc-dev/neo-go/pkg/io"
 	"github.com/nspcc-dev/neo-go/pkg/smartcontract"
+	"github.com/nspcc-dev/neo-go/pkg/smartcontract/manifest"
 	"github.com/nspcc-dev/neo-go/pkg/util"
 	"github.com/nspcc-dev/neo-go/pkg/vm"
 	"github.com/nspcc-dev/neo-go/pkg/vm/emit"
@@ -139,6 +140,25 @@ func headerSliceReverse(dest []*block.Header) {
 	for i, j := 0, len(dest)-1; i < j; i, j = i+1, j-1 {
 		dest[i], dest[j] = dest[j], dest[i]
 	}
+}
+
+// CalculateNetworkFeeForContract calculates network fee for contract with provided manifest and signature.
+func CalculateNetworkFeeForContract(m *manifest.Manifest, invoc []byte) (int64, int, error) {
+	md := m.ABI.GetMethod(manifest.MethodVerify)
+	if md == nil {
+		return 0, 0, ErrInvalidVerificationContract
+	}
+	initMD := m.ABI.GetMethod(manifest.MethodInit)
+	v.LoadScriptWithFlags(verification, smartcontract.NoneFlag)
+	v.Jump(v.Context(), offset)
+	if initMD != nil {
+		v.Call(v.Context(), initMD.Offset)
+	}
+	v.LoadScript(witness.InvocationScript)
+	if keyCache != nil {
+		v.SetPublicKeys(keyCache)
+	}
+	return nil
 }
 
 // CalculateNetworkFee returns network fee for transaction
