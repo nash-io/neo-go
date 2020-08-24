@@ -15,7 +15,7 @@ volumes:
 services:
   node_one:
     container_name: neo_go_node_one
-    image: env_neo_go_image
+    image: us.gcr.io/nash-public/neo-go-docker
     command: "node --config-path /config --privnet"
     volumes:
       - ../config/protocol.privnet.docker.one.yml:/config/protocol.privnet.yml
@@ -30,7 +30,7 @@ services:
       -  20001:20001
   node_two:
     container_name: neo_go_node_two
-    image: env_neo_go_image
+    image: us.gcr.io/nash-public/neo-go-docker
     command: "node --config-path /config --privnet"
     volumes:
       - ../config/protocol.privnet.docker.two.yml:/config/protocol.privnet.yml
@@ -45,7 +45,7 @@ services:
       -  20002:20002
   node_three:
     container_name: neo_go_node_three
-    image: env_neo_go_image
+    image: us.gcr.io/nash-public/neo-go-docker
     command: "node --config-path /config --privnet"
     volumes:
       - ../config/protocol.privnet.docker.three.yml:/config/protocol.privnet.yml
@@ -60,7 +60,7 @@ services:
       -  20003:20003
   node_four:
     container_name: neo_go_node_four
-    image: env_neo_go_image
+    image: us.gcr.io/nash-public/neo-go-docker
     command: "node --config-path /config --privnet"
     volumes:
       - ../config/protocol.privnet.docker.four.yml:/config/protocol.privnet.yml
@@ -73,20 +73,3 @@ services:
       -  20336:20336
       -  30336:30336
       -  20004:20004
-  node_single:
-    container_name: neo_go_node_single
-    image: env_neo_go_image
-    command: "node --config-path /config --privnet"
-    volumes:
-      - ../config/protocol.privnet.docker.single.yml:/config/protocol.privnet.yml
-      - ./wallets/wallet1.json:/wallet1.json
-      - volume_chain:/chains
-      - ./1600-privnet-blocks-single.acc.gz:/privnet-blocks.acc.gz
-    networks:
-      neo_go_network:
-        ipv4_address: 172.200.0.1
-    ports:
-      -  20333:20333
-      -  30333:30333
-      -  20001:20001
-
