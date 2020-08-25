@@ -25,6 +25,10 @@ LABEL version=$VERSION
 
 WORKDIR /
 
+COPY --from=builder /neo-go/.docker/wallets/wallet1.json /wallet1.json
+COPY --from=builder /neo-go/.docker/wallets/wallet2.json /wallet2.json
+COPY --from=builder /neo-go/.docker/wallets/wallet3.json /wallet3.json
+COPY --from=builder /neo-go/.docker/wallets/wallet4.json /wallet4.json
 COPY --from=builder /neo-go/config /config
 COPY --from=builder /neo-go/.docker/chain.acc /chain.acc
 COPY --from=builder /neo-go/.docker/privnet-entrypoint.sh /usr/bin/privnet-entrypoint.sh
@@ -32,6 +36,14 @@ COPY --from=builder /neo-go/.docker/multi-privnet-entrypoint.sh /usr/bin/multi-p
 COPY --from=builder /neo-go/bin/neo-go /usr/bin/neo-go
 COPY --from=builder /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/
 
-ENTRYPOINT ["/usr/bin/multi-privnet-entrypoint.sh"]
+EXPOSE 20333
+EXPOSE 20334
+EXPOSE 20335
+EXPOSE 20336
 
-CMD ["node", "--config-path", "/config", "--privnet"]
+EXPOSE 30333
+EXPOSE 30334
+EXPOSE 30335
+EXPOSE 30336
+
+ENTRYPOINT ["/bin/sh","/usr/bin/multi-privnet-entrypoint.sh"]

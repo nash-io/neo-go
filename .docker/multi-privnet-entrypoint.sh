@@ -1,7 +1,14 @@
 #!/bin/sh
+/usr/bin/neo-go db restore -p --config-name privnet.docker.one -i /chain.acc
+/usr/bin/neo-go db restore -p --config-name privnet.docker.two -i /chain.acc
+/usr/bin/neo-go db restore -p --config-name privnet.docker.three -i /chain.acc
+/usr/bin/neo-go db restore -p --config-name privnet.docker.four -i /chain.acc
 
-screen -dmS node1 expect /usr/bin/privnet-entrypoint.sh node --priv1
-screen -dmS node2 expect /usr/bin/privnet-entrypoint.sh node --priv2
-screen -dmS node3 expect /usr/bin/privnet-entrypoint.sh node --priv3
-screen -dmS node4 expect /usr/bin/privnet-entrypoint.sh node --priv4
+screen -dm /usr/bin/neo-go node --config-name privnet.docker.one
+screen -dm /usr/bin/neo-go node --config-name privnet.docker.two
+screen -dm /usr/bin/neo-go node --config-name privnet.docker.three
+screen -dm /usr/bin/neo-go node --config-name privnet.docker.four
+
+echo "started neo-go private net"
+
 sleep infinity

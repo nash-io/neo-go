@@ -28,8 +28,8 @@ func (c Config) GenerateUserAgent() string {
 
 // Load attempts to load the config from the given
 // path for the given netMode.
-func Load(path string, netMode NetMode) (Config, error) {
-	configPath := fmt.Sprintf("%s/protocol.%s.yml", path, netMode)
+func Load(path string, name string) (Config, error) {
+	configPath := fmt.Sprintf("%s/protocol.%s.yml", path, name)
 	if _, err := os.Stat(configPath); os.IsNotExist(err) {
 		return Config{}, errors.Wrap(err, "Unable to load config")
 	}

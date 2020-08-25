@@ -25,6 +25,7 @@ import (
 func NewCommands() []cli.Command {
 	var cfgFlags = []cli.Flag{
 		cli.StringFlag{Name: "config-path"},
+		cli.StringFlag{Name: "config-name"},
 		cli.BoolFlag{Name: "privnet, p"},
 		cli.BoolFlag{Name: "mainnet, m"},
 		cli.BoolFlag{Name: "testnet, t"},
@@ -110,17 +111,24 @@ func newGraceContext() context.Context {
 // getConfigFromContext looks at path and mode flags in the given config and
 // returns appropriate config.
 func getConfigFromContext(ctx *cli.Context) (config.Config, error) {
-	var net = config.ModePrivNet
+	var net = "privnet"
 	if ctx.Bool("testnet") {
-		net = config.ModeTestNet
+		net = "testnet"
 	}
 	if ctx.Bool("mainnet") {
-		net = config.ModeMainNet
+		net = "mainnet"
 	}
 	configPath := "./config"
 	if argCp := ctx.String("config-path"); argCp != "" {
 		configPath = argCp
 	}
+	if argCp := ctx.String("config-name"); argCp != "" {
+		net = argCp
+	}
+
+	fmt.Printf("Using config path: %s", configPath)
+	fmt.Printf("Using config name: %s", net)
+
 	return config.Load(configPath, net)
 }
 

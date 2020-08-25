@@ -10,10 +10,10 @@ ProtocolConfiguration:
     - 03d90c07df63e690ce77912e10ab51acc944b66860237b608c4f8f8309e71ee699
     - 02a7bc55fe8684e0119768d104ba30795bdcc86619e864add26156723ed185cd62
   SeedList:
-    - 172.200.0.1:20333
-    - 172.200.0.2:20334
-    - 172.200.0.3:20335
-    - 172.200.0.4:20336
+    - 127.0.0.1:20333
+    - 127.0.0.1:20334
+    - 127.0.0.1:20335
+    - 127.0.0.1:20336
   SystemFee:
     EnrollmentTransaction: 1000
     IssueTransaction: 500
