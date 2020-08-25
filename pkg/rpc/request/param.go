@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"strconv"
+	"strings"
 
 	"github.com/nspcc-dev/neo-go/pkg/core/transaction"
 	"github.com/nspcc-dev/neo-go/pkg/encoding/address"
@@ -126,6 +127,8 @@ func (p *Param) GetUint256() (util.Uint256, error) {
 	if err != nil {
 		return util.Uint256{}, err
 	}
+
+	s = strings.TrimPrefix(s, "0x")
 
 	return util.Uint256DecodeStringLE(s)
 }
